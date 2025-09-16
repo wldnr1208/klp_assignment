@@ -1,98 +1,150 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import React from 'react';
+import { View, Text, StyleSheet, SafeAreaView, Alert } from 'react-native';
+import { useAuthStore } from '../../src/store/authStore';
+import { Button } from '../../src/components/ui/Button';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const { user, signOut } = useAuthStore();
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  const handleSignOut = async () => {
+    Alert.alert(
+      '로그아웃',
+      '정말 로그아웃하시겠습니까?',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '로그아웃',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await signOut();
+            } catch {
+              Alert.alert('오류', '로그아웃 중 오류가 발생했습니다.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Text style={styles.title}>환영합니다!</Text>
+          <Text style={styles.subtitle}>커뮤니티 앱에 오신 것을 환영합니다</Text>
+        </View>
+
+        <View style={styles.userInfo}>
+          <Text style={styles.userInfoTitle}>사용자 정보</Text>
+          <View style={styles.userInfoCard}>
+            <Text style={styles.userInfoText}>
+              <Text style={styles.userInfoLabel}>사용자명: </Text>
+              {user?.username}
+            </Text>
+            <Text style={styles.userInfoText}>
+              <Text style={styles.userInfoLabel}>이메일: </Text>
+              {user?.email}
+            </Text>
+            <Text style={styles.userInfoText}>
+              <Text style={styles.userInfoLabel}>가입일: </Text>
+              {user?.created_at ? new Date(user.created_at).toLocaleDateString() : ''}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.actions}>
+          <Text style={styles.actionsTitle}>개발 예정 기능</Text>
+          <View style={styles.featureList}>
+            <Text style={styles.featureItem}>📝 게시글 작성 및 관리</Text>
+            <Text style={styles.featureItem}>🖼️ 이미지 업로드</Text>
+            <Text style={styles.featureItem}>💬 댓글 시스템</Text>
+            <Text style={styles.featureItem}>🔍 게시글 검색</Text>
+          </View>
+        </View>
+
+        <Button
+          title="로그아웃"
+          onPress={handleSignOut}
+          variant="outline"
+          style={styles.signOutButton}
+        />
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
   },
-  stepContainer: {
-    gap: 8,
+  content: {
+    flex: 1,
+    padding: 24,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+  },
+  userInfo: {
+    marginBottom: 32,
+  },
+  userInfoTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 16,
+  },
+  userInfoCard: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  userInfoText: {
+    fontSize: 16,
+    marginBottom: 8,
+    color: '#333',
+  },
+  userInfoLabel: {
+    fontWeight: '600',
+    color: '#007AFF',
+  },
+  actions: {
+    marginBottom: 32,
+  },
+  actionsTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 16,
+  },
+  featureList: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  featureItem: {
+    fontSize: 16,
+    marginBottom: 8,
+    color: '#666',
+  },
+  signOutButton: {
+    marginTop: 'auto',
   },
 });
