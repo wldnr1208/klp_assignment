@@ -90,24 +90,58 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       if (error) throw error;
 
       if (data.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: data.user.id,
-            email: data.user.email,
-            username,
-          });
+        // 트리거가 프로필을 생성할 시간을 조금 기다림
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
-        if (profileError) throw profileError;
+        // 프로필이 생성되었는지 확인 (최대 5번 시도)
+        let profile = null;
+        let attempts = 0;
+        const maxAttempts = 5;
 
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
+        while (!profile && attempts < maxAttempts) {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
+
+          if (profileData) {
+            profile = profileData;
+          } else {
+            attempts++;
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+        }
 
         if (profile) {
           get().setAuth(profile, data.session);
+        } else {
+          // 트리거가 실패한 경우 수동으로 프로필 생성 시도
+          try {
+            const { error: profileError } = await supabase
+              .from('profiles')
+              .insert({
+                id: data.user.id,
+                email: data.user.email || email,
+                username,
+              });
+
+            if (!profileError) {
+              const { data: newProfile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', data.user.id)
+                .single();
+
+              if (newProfile) {
+                get().setAuth(newProfile, data.session);
+              }
+            }
+          } catch (insertError) {
+            // 프로필 생성 실패해도 사용자는 생성되었으므로 성공으로 처리
+            console.warn('Profile creation failed, but user was created:', insertError);
+            set({ isLoading: false });
+          }
         }
       }
     } catch (error) {

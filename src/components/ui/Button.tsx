@@ -51,8 +51,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   primary: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: '#1a1a1a',
+    borderColor: '#1a1a1a',
   },
   secondary: {
     backgroundColor: '#666',
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   },
   outline: {
     backgroundColor: 'transparent',
-    borderColor: '#007AFF',
+    borderColor: '#1a1a1a',
   },
   small: {
     paddingHorizontal: 12,
@@ -88,6 +88,6 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   outlineText: {
-    color: '#007AFF',
+    color: '#1a1a1a',
   },
 });

@@ -159,6 +159,7 @@ export function SignupScreen() {
               title="회원가입"
               onPress={handleSignup}
               loading={isLoading}
+              variant="primary"
               style={styles.signupButton}
             />
 
@@ -181,7 +182,7 @@ export function SignupScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#ffffff',
   },
   keyboardView: {
     flex: 1,
@@ -189,37 +190,46 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingVertical: 40,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 48,
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#1a1a1a',
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 15,
+    color: '#666666',
     textAlign: 'center',
+    fontWeight: '400',
   },
   form: {
     width: '100%',
+    backgroundColor: '#ffffff',
+    padding: 0,
   },
   signupButton: {
-    marginTop: 8,
-    marginBottom: 24,
+    marginTop: 24,
+    marginBottom: 32,
+    backgroundColor: '#1a1a1a',
+    borderRadius: 8,
+    height: 52,
   },
   loginContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 8,
   },
   loginText: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 15,
+    color: '#666666',
+    marginRight: 4,
   },
 });
