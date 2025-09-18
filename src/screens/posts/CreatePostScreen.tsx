@@ -9,7 +9,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -19,11 +21,12 @@ import { useAuthStore } from '../../store/authStore';
 export function CreatePostScreen() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
 
   const createPostMutation = useMutation({
-    mutationFn: (postData: { title: string; content: string }) =>
+    mutationFn: (postData: { title: string; content: string; image?: string }) =>
       postsApi.createPost(postData, user!.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
@@ -71,11 +74,35 @@ export function CreatePostScreen() {
     createPostMutation.mutate({
       title: title.trim(),
       content: content.trim(),
+      image: selectedImage || undefined,
     });
   };
 
+  const handleImagePicker = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('권한 필요', '이미지를 선택하려면 갤러리 접근 권한이 필요합니다.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setSelectedImage(result.assets[0].uri);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+  };
+
   const handleCancel = () => {
-    if (title.trim() || content.trim()) {
+    if (title.trim() || content.trim() || selectedImage) {
       Alert.alert(
         '작성 취소',
         '작성 중인 내용이 있습니다. 정말 취소하시겠습니까?',
@@ -142,6 +169,29 @@ export function CreatePostScreen() {
             multiline
             textAlignVertical="top"
           />
+
+          {/* Image Picker */}
+          <View style={styles.imageSection}>
+            {selectedImage ? (
+              <View style={styles.selectedImageContainer}>
+                <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
+                <TouchableOpacity
+                  style={styles.removeImageButton}
+                  onPress={handleRemoveImage}
+                >
+                  <Text style={styles.removeImageText}>✕</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={styles.imagePickerButton}
+                onPress={handleImagePicker}
+              >
+                <Text style={styles.imagePickerText}>+</Text>
+                <Text style={styles.imagePickerLabel}>이미지 추가</Text>
+              </TouchableOpacity>
+            )}
+          </View>
 
           {/* Character Count */}
           <View style={styles.characterCount}>
@@ -232,5 +282,56 @@ const styles = StyleSheet.create({
   characterCountText: {
     fontSize: 12,
     color: '#999999',
+  },
+  imageSection: {
+    paddingVertical: 16,
+  },
+  imagePickerButton: {
+    width: 100,
+    height: 100,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+    borderStyle: 'dashed',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8f8f8',
+  },
+  imagePickerText: {
+    fontSize: 32,
+    color: '#cccccc',
+    fontWeight: '300',
+  },
+  imagePickerLabel: {
+    fontSize: 12,
+    color: '#999999',
+    marginTop: 4,
+  },
+  selectedImageContainer: {
+    position: 'relative',
+    width: 200,
+    height: 150,
+  },
+  selectedImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
+    resizeMode: 'cover',
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  removeImageText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });

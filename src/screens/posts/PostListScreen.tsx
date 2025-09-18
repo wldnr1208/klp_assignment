@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
@@ -56,6 +57,9 @@ function PostItem({ post }: PostItemProps) {
           <Text style={styles.postPreview} numberOfLines={3}>
             {post.content}
           </Text>
+        )}
+        {post.image_url && (
+          <Image source={{ uri: post.image_url }} style={styles.postImage} />
         )}
       </View>
 
@@ -257,5 +261,12 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 16,
     color: '#ff4444',
+  },
+  postImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 12,
+    marginTop: 12,
+    resizeMode: 'cover',
   },
 });
