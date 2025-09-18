@@ -1,8 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../store/authStore';
-import { Button } from '../../components/ui/Button';
 
 export function ProfileScreen() {
   const { user, signOut } = useAuthStore();
@@ -28,52 +27,56 @@ export function ProfileScreen() {
     );
   };
 
+  const menuItems = [
+    { title: '프로필 편집', onPress: () => {} },
+    { title: '알림 설정', onPress: () => {} },
+    { title: '개인정보 설정', onPress: () => {} },
+    { title: '앱 설정', onPress: () => {} },
+  ];
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
+        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>프로필</Text>
         </View>
 
-        <View style={styles.userInfo}>
+        {/* User Profile Section */}
+        <View style={styles.profileSection}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
               {user?.username?.charAt(0).toUpperCase()}
             </Text>
           </View>
-
-          <View style={styles.userInfoCard}>
-            <Text style={styles.userInfoText}>
-              <Text style={styles.userInfoLabel}>사용자명: </Text>
-              {user?.username}
-            </Text>
-            <Text style={styles.userInfoText}>
-              <Text style={styles.userInfoLabel}>이메일: </Text>
-              {user?.email}
-            </Text>
-            <Text style={styles.userInfoText}>
-              <Text style={styles.userInfoLabel}>가입일: </Text>
-              {user?.created_at ? new Date(user.created_at).toLocaleDateString() : ''}
-            </Text>
-          </View>
+          <Text style={styles.username}>{user?.username}</Text>
+          <Text style={styles.email}>{user?.email}</Text>
+          <Text style={styles.joinDate}>
+            {user?.created_at ? new Date(user.created_at).toLocaleDateString() : ''}부터 함께
+          </Text>
         </View>
 
-        <View style={styles.actions}>
-          <Text style={styles.actionsTitle}>개발 예정 기능</Text>
-          <View style={styles.featureList}>
-            <Text style={styles.featureItem}>👤 프로필 편집</Text>
-            <Text style={styles.featureItem}>🔔 알림 설정</Text>
-            <Text style={styles.featureItem}>🔒 개인정보 설정</Text>
-            <Text style={styles.featureItem}>📱 앱 설정</Text>
-          </View>
+        {/* Menu Items */}
+        <View style={styles.menuSection}>
+          {menuItems.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.menuItem,
+                index === menuItems.length - 1 && styles.lastMenuItem
+              ]}
+              onPress={item.onPress}
+            >
+              <Text style={styles.menuItemText}>{item.title}</Text>
+              <Text style={styles.menuItemArrow}>›</Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
-        <Button
-          title="로그아웃"
-          onPress={handleSignOut}
-          variant="outline"
-          style={styles.signOutButton}
-        />
+        {/* Logout Button */}
+        <TouchableOpacity style={styles.logoutButton} onPress={handleSignOut}>
+          <Text style={styles.logoutText}>로그아웃</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -86,20 +89,23 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 24,
   },
   header: {
-    alignItems: 'center',
-    marginBottom: 32,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#1a1a1a',
+    textAlign: 'center',
   },
-  userInfo: {
+  profileSection: {
     alignItems: 'center',
-    marginBottom: 32,
+    paddingVertical: 40,
+    paddingHorizontal: 20,
   },
   avatar: {
     width: 80,
@@ -108,48 +114,67 @@ const styles = StyleSheet.create({
     backgroundColor: '#1a1a1a',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   avatarText: {
     color: '#ffffff',
     fontSize: 32,
     fontWeight: 'bold',
   },
-  userInfoCard: {
-    backgroundColor: '#f8f9fa',
-    padding: 20,
-    borderRadius: 12,
-    width: '100%',
-  },
-  userInfoText: {
-    fontSize: 16,
-    marginBottom: 8,
-    color: '#1a1a1a',
-  },
-  userInfoLabel: {
-    fontWeight: '600',
-    color: '#666666',
-  },
-  actions: {
-    marginBottom: 32,
-  },
-  actionsTitle: {
-    fontSize: 18,
+  username: {
+    fontSize: 24,
     fontWeight: '600',
     color: '#1a1a1a',
-    marginBottom: 16,
+    marginBottom: 4,
   },
-  featureList: {
-    backgroundColor: '#f8f9fa',
-    padding: 20,
-    borderRadius: 12,
-  },
-  featureItem: {
+  email: {
     fontSize: 16,
-    marginBottom: 8,
     color: '#666666',
+    marginBottom: 8,
   },
-  signOutButton: {
+  joinDate: {
+    fontSize: 14,
+    color: '#999999',
+  },
+  menuSection: {
+    marginTop: 20,
+    paddingHorizontal: 20,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  lastMenuItem: {
+    borderBottomWidth: 0,
+  },
+  menuItemText: {
+    fontSize: 16,
+    color: '#1a1a1a',
+    fontWeight: '500',
+  },
+  menuItemArrow: {
+    fontSize: 20,
+    color: '#cccccc',
+    fontWeight: '300',
+  },
+  logoutButton: {
     marginTop: 'auto',
+    marginHorizontal: 20,
+    marginBottom: 40,
+    paddingVertical: 16,
+    backgroundColor: '#ff4444',
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  logoutText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
